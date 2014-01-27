@@ -40,7 +40,7 @@ var cwine = (function() {
       this.draw();
 
       this.restore();
-    }
+    };
   }
 
 
@@ -120,7 +120,7 @@ var cwine = (function() {
       // reset state to start
       this.init();
     }
-  }
+  };
 
 })();
 
