@@ -52,7 +52,8 @@ var cwine = (function() {
     currPanel:   0,
     pos:         { x: 0, y: 5 },
 
-    // daemons
+    // animation daemons, each slides the canvas over by
+    // x,y passed to cwineSlide() for given length
     animateLeft:  new MiniDaemon( context,
                                   cwineSlide( -20, 0 ),
                                   1, 21 ),
@@ -67,6 +68,10 @@ var cwine = (function() {
                                   1, 16 ),
 
     // actions
+
+    // initialize the canvas by transforming to the identity
+    // matrix, clearing it, then calling context.draw()
+    // cantered on the first panel
     init: function cwineInit() {
       this.context.save();
 
@@ -126,6 +131,7 @@ var cwine = (function() {
 
 cwine.init();
 
+// setup keybindings to slide the canvas
 var canvas = document.getElementById("cwine");
 canvas.onkeydown = function(event) {
 
