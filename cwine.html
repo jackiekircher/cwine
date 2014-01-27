@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>cwine wtf am I doing</title>
+<script type="text/javascript" src="minidaemon.js"></script>
+
+<style type="text/css">
+#images {
+  display:  none;
+}
+</style>
+</head>
+
+<body>
+  <p>
+    <input type="button" onclick="cwine.right();" value="next panel" />
+    <input type="button" onclick="cwine.left();" value="previous panel">
+    <input type="button" onclick="cwine.reset();" value="reset" />
+  </p>
+
+  <div id="images" style="left: 10px">
+    <img id="yarn" src="yarn-web.png" />
+    <img id="laser" src="laser-web.png" />
+    <img id="sunbeam" src="sunbeam-web.png" />
+  </div>
+
+  <canvas id="cwine" width="1200" height="600" tabindex="0"></canvas>
+
+  <script type="text/javascript" src="cwine.js"></script>
+</body>
+</html>
