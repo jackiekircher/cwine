@@ -1,18 +1,15 @@
 var cwine = (function() {
 
-  var img1    = document.getElementById("yarn"),
-      img2    = document.getElementById("laser"),
-      img3    = document.getElementById("sunbeam"),
-      canvas  = document.getElementById("cwine"),
+  var canvas  = document.getElementById("cwine"),
       context = canvas.getContext("2d");
 
   context.draw = function cwineDraw() {
     var x = 0, y = 0;
 
-    cwine.panels.forEach(function(image) {
-      this.drawBorder( image, 3, x, y );
-      this.drawImage( image, x, y );
-      x += image.width + 20;
+    cwine.panels.forEach(function(panel) {
+      this.drawBorder( panel.image, 3, x, y );
+      this.drawImage( panel.image, x, y );
+      x += panel.image.width + 20;
     }, this);
   };
 
@@ -43,12 +40,19 @@ var cwine = (function() {
     };
   }
 
+  function loadPanels(images) {
+    panels = [];
+    images.forEach(function(image, i) {
+      panels[i] = new Panel(image);
+    });
+
+    return panels;
+  }
 
   return {
     // state
     canvas:      canvas,
     context:     context,
-    panels:      [ img1, img2, img3 ],
     currPanel:   0,
     pos:         { x: 0, y: 5 },
 
@@ -72,34 +76,43 @@ var cwine = (function() {
     // initialize the canvas by transforming to the identity
     // matrix, clearing it, then calling context.draw()
     // cantered on the first panel
-    init: function cwineInit() {
-      this.context.save();
+    init: function cwineInit(images, newPaths) {
 
-      this.pos.x = (this.canvas.width / 2) - (this.panels[0].width / 2);
-      this.pos.y = (this.canvas.height / 2) - (this.panels[0].height / 2);
-      this.currPanel = 0;
-      this.context.setTransform( 1, 0, 0, 1, 0 ,0 );
-      this.context.clearRect( 0, 0,
-                              this.canvas.width,
-                              this.canvas.height );
-      this.context.translate( this.pos.x, this.pos.y );
-      this.context.draw(context);
+      this.panels = loadPanels(images);
 
-      this.context.restore();
+      // configure paths - this could use a bit of work
+      for (var panelIndex in newPaths) {
+
+        var panel = this.panels[panelIndex],
+            paths = newPaths[panelIndex];
+
+        for (var j = 0; j < paths.length; j++) {
+          var pathIndex = paths[j];
+          panel.addPath(panels[pathIndex]);
+        }
+      }
+
+      this.reset();
     },
 
     right: function cwineRight() {
-      if ( this.currPanel >= this.panels.length - 1) return;
-      this.currPanel += 1;
-      this.animateRight.resetIndex();
-      this.animateRight.start();
+      console.log(this.currPanel);
+      if (panels[this.currPanel].hasPath(panels[this.currPanel+1])) {
+        console.log("panel "+ this.currPanel +" has path to panels " + (this.currPanel+1));
+        this.currPanel += 1;
+        this.animateRight.resetIndex();
+        this.animateRight.start();
+      }
     },
 
     left: function cwineLeft() {
-      if ( this.currPanel <= 0 ) return;
-      this.currPanel -= 1;
-      this.animateLeft.resetIndex();
-      this.animateLeft.start();
+      console.log(this.currPanel);
+      if (panels[this.currPanel].hasPath(panels[this.currPanel-1])) {
+        console.log("panel "+ this.currPanel +" has path to panels " + (this.currPanel-1));
+        this.currPanel -= 1;
+        this.animateLeft.resetIndex();
+        this.animateLeft.start();
+      }
     },
 
     up: function cwineUp() {
@@ -120,16 +133,25 @@ var cwine = (function() {
       // pause current animation
       this.animateLeft.pause();
       this.animateRight.pause();
-      console.log(this.currPanel);
 
       // reset state to start
-      this.init();
+      this.context.save();
+
+      this.currPanel = 0;
+      this.pos.x = (this.canvas.width / 2) - (this.panels[0].width / 2);
+      this.pos.y = (this.canvas.height / 2) - (this.panels[0].height / 2);
+      this.context.setTransform( 1, 0, 0, 1, 0 ,0 );
+      this.context.clearRect( 0, 0,
+                              this.canvas.width,
+                              this.canvas.height );
+      this.context.translate( this.pos.x, this.pos.y );
+      this.context.draw(context);
+
+      this.context.restore();
     }
   };
 
 })();
-
-cwine.init();
 
 // setup keybindings to slide the canvas
 var canvas = document.getElementById("cwine");
@@ -151,3 +173,16 @@ canvas.onkeydown = function(event) {
       return false;
   }
 };
+
+var img1    = document.getElementById("yarn"),
+    img2    = document.getElementById("laser"),
+    img3    = document.getElementById("sunbeam");
+
+var images = [ img1, img2, img3 ];
+// what other format can be used here?
+var paths = { 0: [1],
+              1: [0,2],
+              2: [1] };
+
+
+cwine.init(images, paths);
