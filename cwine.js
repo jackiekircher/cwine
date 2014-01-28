@@ -55,10 +55,10 @@ var cwine = (function() {
     // animation daemons, each slides the canvas over by
     // x,y passed to cwineSlide() for given length
     animateLeft:  new MiniDaemon( context,
-                                  cwineSlide( -20, 0 ),
+                                  cwineSlide( 20, 0 ),
                                   1, 21 ),
     animateRight: new MiniDaemon( context,
-                                  cwineSlide( 20, 0 ),
+                                  cwineSlide( -20, 0 ),
                                   1, 21 ),
     animateUp:    new MiniDaemon( context,
                                   cwineSlide( 0, 20 ),
@@ -91,15 +91,15 @@ var cwine = (function() {
     right: function cwineRight() {
       if ( this.currPanel >= this.panels.length - 1) return;
       this.currPanel += 1;
-      this.animateLeft.resetIndex();
-      this.animateLeft.start();
+      this.animateRight.resetIndex();
+      this.animateRight.start();
     },
 
     left: function cwineLeft() {
       if ( this.currPanel <= 0 ) return;
       this.currPanel -= 1;
-      this.animateRight.resetIndex();
-      this.animateRight.start();
+      this.animateLeft.resetIndex();
+      this.animateLeft.start();
     },
 
     up: function cwineUp() {
