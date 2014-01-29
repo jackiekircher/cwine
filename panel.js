@@ -1,10 +1,20 @@
-function Panel(image) {
+function Panel(image, x, y, padding) {
 
-  this.image  = image;
-  this.width  = image.width;
-  this.height = image.height;
-  this.paths  = [];
+  this.image   = image;
+  this.width   = image.width;
+  this.height  = image.height;
+  this.padding = padding;
+  this.index   = { x: x, y: y };
+  this.paths   = [];
 }
+
+Panel.prototype.xOffset = function panelXOffset() {
+  return this.index.x * (this.width + this.padding);
+};
+
+Panel.prototype.yOffset = function panelXOffset() {
+  return this.index.y * (this.height + this.padding);
+};
 
 // connect a panel to another, allowing the reader to move
 // between them

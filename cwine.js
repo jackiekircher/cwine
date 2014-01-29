@@ -1,15 +1,17 @@
-var cwine = (function() {
+var canvas  = document.getElementById("cwine"),
+    context = canvas.getContext("2d");
 
-  var canvas  = document.getElementById("cwine"),
-      context = canvas.getContext("2d");
+var cwine = (function Cwine(canvas, context) {
 
   context.draw = function cwineDraw() {
-    var x = 0, y = 0;
+    var x = 0, y = 0,
+        borderWidth = 3;
 
     cwine.panels.forEach(function(panel) {
-      this.drawBorder( panel.image, 3, x, y );
-      this.drawImage( panel.image, x, y );
-      x += panel.image.width + 20;
+      xPos = panel.xOffset();
+      yPos = panel.yOffset();
+      this.drawBorder( panel.image, borderWidth, xPos, yPos );
+      this.drawImage( panel.image, xPos, yPos );
     }, this);
   };
 
@@ -40,10 +42,10 @@ var cwine = (function() {
     };
   }
 
-  function loadPanels(images) {
+  function loadPanels(images, padding) {
     panels = [];
     images.forEach(function(image, i) {
-      panels[i] = new Panel(image);
+      panels[i] = new Panel(image[0], image[1], image[2], padding);
     });
 
     return panels;
@@ -53,8 +55,9 @@ var cwine = (function() {
     // state
     canvas:      canvas,
     context:     context,
+    padding:     20,
     currPanel:   0,
-    pos:         { x: 0, y: 5 },
+    pos:         {},
 
     // animation daemons, each slides the canvas over by
     // x,y passed to cwineSlide() for given length
@@ -78,7 +81,7 @@ var cwine = (function() {
     // cantered on the first panel
     init: function cwineInit(images, newPaths) {
 
-      this.panels = loadPanels(images);
+      this.panels = loadPanels(images, this.padding);
 
       // configure paths - this could use a bit of work
       for (var panelIndex in newPaths) {
@@ -96,9 +99,7 @@ var cwine = (function() {
     },
 
     right: function cwineRight() {
-      console.log(this.currPanel);
       if (panels[this.currPanel].hasPath(panels[this.currPanel+1])) {
-        console.log("panel "+ this.currPanel +" has path to panels " + (this.currPanel+1));
         this.currPanel += 1;
         this.animateRight.resetIndex();
         this.animateRight.start();
@@ -106,9 +107,7 @@ var cwine = (function() {
     },
 
     left: function cwineLeft() {
-      console.log(this.currPanel);
       if (panels[this.currPanel].hasPath(panels[this.currPanel-1])) {
-        console.log("panel "+ this.currPanel +" has path to panels " + (this.currPanel-1));
         this.currPanel -= 1;
         this.animateLeft.resetIndex();
         this.animateLeft.start();
@@ -138,9 +137,12 @@ var cwine = (function() {
       this.context.save();
 
       this.currPanel = 0;
-      this.pos.x = (this.canvas.width / 2) - (this.panels[0].width / 2);
-      this.pos.y = (this.canvas.height / 2) - (this.panels[0].height / 2);
+      var startPanel = this.panels[0];
+
       this.context.setTransform( 1, 0, 0, 1, 0 ,0 );
+
+      this.pos.x =  (this.canvas.width / 2) - (startPanel.width / 2) - startPanel.xOffset();
+      this.pos.y =  (this.canvas.height / 2) - (startPanel.height / 2) - startPanel.yOffset();
       this.context.clearRect( 0, 0,
                               this.canvas.width,
                               this.canvas.height );
@@ -151,7 +153,7 @@ var cwine = (function() {
     }
   };
 
-})();
+})(canvas, context);
 
 // setup keybindings to slide the canvas
 var canvas = document.getElementById("cwine");
@@ -178,7 +180,9 @@ var img1    = document.getElementById("yarn"),
     img2    = document.getElementById("laser"),
     img3    = document.getElementById("sunbeam");
 
-var images = [ img1, img2, img3 ];
+var images = [ [img1, 0, 1],
+               [img2, 1, 1],
+               [img3, 2, 1] ];
 // what other format can be used here?
 var paths = { 0: [1],
               1: [0,2],
