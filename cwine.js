@@ -23,7 +23,7 @@ var cwine = (function Cwine(canvas, context) {
 
   context.drawBorder = function cwineDrawBorder(image, width, x, y) {
 
-    this.fillStyle = "rgb(255, 255, 255)";
+    this.fillStyle = "rgb(0, 0, 0)";
     this.fillRect( x - width, y - width,
                    image.width + width*2, image.height + width*2 );
   };
