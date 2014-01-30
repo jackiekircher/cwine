@@ -7,12 +7,18 @@ var cwine = (function Cwine(canvas, context) {
     var x = 0, y = 0,
         borderWidth = 3;
 
-    cwine.panels.forEach(function(panel) {
-      xPos = panel.xOffset();
-      yPos = panel.yOffset();
-      this.drawBorder( panel.image, borderWidth, xPos, yPos );
-      this.drawImage( panel.image, xPos, yPos );
-    }, this);
+    for ( var i = 0; i < cwine.panels.length; i++ ) {
+      for ( var j = 0; j < cwine.panels[i].length; j++ ) {
+
+        var panel = cwine.panels[i][j];
+        if ( panel !== undefined ) {
+          xPos = panel.xOffset();
+          yPos = panel.yOffset();
+          this.drawBorder( panel.image, borderWidth, xPos, yPos );
+          this.drawImage( panel.image, xPos, yPos );
+        }
+      }
+    }
   };
 
   context.drawBorder = function cwineDrawBorder(image, width, x, y) {
@@ -43,9 +49,23 @@ var cwine = (function Cwine(canvas, context) {
   }
 
   function loadPanels(images, padding) {
-    panels = [];
+
+    var sizeX  = 1,
+        sizeY  = 1,
+        panels = [];
+
+    images.forEach(function(image) {
+      sizeX = Math.max(sizeX, image[1] + 1);
+      sizey = Math.max(sizeY, image[2] + 1);
+    });
+
+    for( var i = 0; i < sizeX ; i++ ) {
+      panels[i] = new Array(sizeY);
+    }
+
     images.forEach(function(image, i) {
-      panels[i] = new Panel(image[0], image[1], image[2], padding);
+      var x = image[1], y = image[2];
+      panels[x][y] = new Panel(image[0], x, y, padding);
     });
 
     return panels;
@@ -56,7 +76,8 @@ var cwine = (function Cwine(canvas, context) {
     canvas:      canvas,
     context:     context,
     padding:     20,
-    currPanel:   0,
+    startIndex:  {},
+    currIndex:   {},
     pos:         {},
 
     // animation daemons, each slides the canvas over by
@@ -79,53 +100,45 @@ var cwine = (function Cwine(canvas, context) {
     // initialize the canvas by transforming to the identity
     // matrix, clearing it, then calling context.draw()
     // cantered on the first panel
-    init: function cwineInit(images, newPaths) {
-
+    init: function cwineInit(images) {
       this.panels = loadPanels(images, this.padding);
-
-      // configure paths - this could use a bit of work
-      for (var panelIndex in newPaths) {
-
-        var panel = this.panels[panelIndex],
-            paths = newPaths[panelIndex];
-
-        for (var j = 0; j < paths.length; j++) {
-          var pathIndex = paths[j];
-          panel.addPath(panels[pathIndex]);
-        }
-      }
-
+      this.startIndex.x = images[0][1];
+      this.startIndex.y = images[0][2];
       this.reset();
     },
 
     right: function cwineRight() {
-      if (panels[this.currPanel].hasPath(panels[this.currPanel+1])) {
-        this.currPanel += 1;
+      if (this.panels[this.currIndex.x+1] &&
+          this.panels[this.currIndex.x+1][this.currIndex.y]) {
+        this.currIndex.x += 1;
         this.animateRight.resetIndex();
         this.animateRight.start();
       }
     },
 
     left: function cwineLeft() {
-      if (panels[this.currPanel].hasPath(panels[this.currPanel-1])) {
-        this.currPanel -= 1;
+      if (this.panels[this.currIndex.x-1] &&
+          this.panels[this.currIndex.x-1][this.currIndex.y]) {
+        this.currIndex.x -= 1;
         this.animateLeft.resetIndex();
         this.animateLeft.start();
       }
     },
 
     up: function cwineUp() {
-      //if ( this.currPanel <= 0 ) return;
-      //this.currPanel -= 1;
-      this.animateUp.resetIndex();
-      this.animateUp.start();
+      if (this.panels[this.currIndex.x][this.currIndex.y-1]) {
+        this.currIndex.y -= 1;
+        this.animateUp.resetIndex();
+        this.animateUp.start();
+      }
     },
 
     down: function cwineDown() {
-      //if ( this.currPanel <= 0 ) return;
-      //this.currPanel -= 1;
-      this.animateDown.resetIndex();
-      this.animateDown.start();
+      if (this.panels[this.currIndex.x][this.currIndex.y+1]) {
+        this.currIndex.y += 1;
+        this.animateDown.resetIndex();
+        this.animateDown.start();
+      }
     },
 
     reset: function cwineReset() {
@@ -136,11 +149,12 @@ var cwine = (function Cwine(canvas, context) {
       // reset state to start
       this.context.save();
 
-      this.currPanel = 0;
-      var startPanel = this.panels[0];
+      var startPanel = this.panels[this.startIndex.x][this.startIndex.y];
 
       this.context.setTransform( 1, 0, 0, 1, 0 ,0 );
 
+      this.currIndex.x = this.startIndex.x;
+      this.currIndex.y = this.startIndex.y;
       this.pos.x =  (this.canvas.width / 2) - (startPanel.width / 2) - startPanel.xOffset();
       this.pos.y =  (this.canvas.height / 2) - (startPanel.height / 2) - startPanel.yOffset();
       this.context.clearRect( 0, 0,
@@ -180,13 +194,9 @@ var img1    = document.getElementById("yarn"),
     img2    = document.getElementById("laser"),
     img3    = document.getElementById("sunbeam");
 
-var images = [ [img1, 0, 1],
-               [img2, 1, 1],
-               [img3, 2, 1] ];
-// what other format can be used here?
-var paths = { 0: [1],
-              1: [0,2],
-              2: [1] };
+var images = [ [img1, 0, 0],
+               [img2, 1, 0],
+               [img3, 2, 0],
+               [img1, 0, 1] ];
 
-
-cwine.init(images, paths);
+cwine.init(images);
