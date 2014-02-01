@@ -1,4 +1,4 @@
-function Panel(name, image, x, y, padding) {
+function Panel(name, image, paths, x, y, padding) {
 
   this.name    = name;
   this.image   = image;
@@ -7,6 +7,10 @@ function Panel(name, image, x, y, padding) {
   this.padding = padding;
   this.index   = { x: x, y: y };
   this.paths   = [];
+
+  paths.forEach(function(pathName) {
+    this.addPath(pathName);
+  }, this);
 }
 
 Panel.prototype.xOffset = function panelXOffset() {
@@ -19,11 +23,11 @@ Panel.prototype.yOffset = function panelXOffset() {
 
 // connect a panel to another, allowing the reader to move
 // between them
-Panel.prototype.addPath = function panelAddPath(panel) {
-  this.paths.push(panel);
+Panel.prototype.addPath = function panelAddPath(name) {
+  this.paths.push(name);
 };
 
 // determine whether a panel has a path to another panel.
-Panel.prototype.hasPath = function panelHasPath(panel) {
-  return this.paths.indexOf(panel) >= 0;
+Panel.prototype.hasPath = function panelHasPath(name) {
+  return this.paths.indexOf(name) >= 0;
 };

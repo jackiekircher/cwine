@@ -68,6 +68,7 @@ var cwine = (function Cwine(canvas, context) {
       var x = config.x, y = config.y;
       panels[x][y] = new Panel(config.name,
                                config.image,
+                               config.paths,
                                x, y, padding);
     });
 
@@ -193,13 +194,30 @@ canvas.onkeydown = function(event) {
   }
 };
 
-var img1    = document.getElementById("yarn"),
-    img2    = document.getElementById("laser"),
-    img3    = document.getElementById("sunbeam");
+var panel1 = { name:  "yarn1",
+               image: document.getElementById("yarn"),
+               paths: [ "yarn2", "laser" ],
+               x:     0,
+               y:     0 };
 
-var images = [ { name: "yarn1", image: img1, x: 0, y: 0 },
-               { name: "laser", image: img2, x: 1, y: 0 },
-               { name: "sun",   image: img3, x: 2, y: 0 },
-               { name: "yarn2", image: img1, x: 0, y: 1 } ];
+var panel2 = { name:  "yarn2",
+               image: document.getElementById("yarn"),
+               paths: [ "yarn1" ],
+               x:     0,
+               y:     1 };
+
+var panel3 = { name:  "laser",
+               image: document.getElementById("laser"),
+               paths: [ "yarn, sun" ],
+               x:     1,
+               y:     0 };
+
+var panel4 = { name:  "sun",
+               image: document.getElementById("sunbeam"),
+               paths: [ "laser" ],
+               x:     2,
+               y:     0 };
+
+var images = [ panel1, panel2, panel3, panel4 ];
 
 cwine.init(images);
