@@ -1,5 +1,6 @@
-function Panel(image, x, y, padding) {
+function Panel(name, image, x, y, padding) {
 
+  this.name    = name;
   this.image   = image;
   this.width   = image.width;
   this.height  = image.height;

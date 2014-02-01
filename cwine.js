@@ -19,6 +19,7 @@ var cwine = (function Cwine(canvas, context) {
         }
       }
     }
+
   };
 
   context.drawBorder = function cwineDrawBorder(image, width, x, y) {
@@ -48,24 +49,26 @@ var cwine = (function Cwine(canvas, context) {
     };
   }
 
-  function loadPanels(images, padding) {
+  function loadPanels(panelConfig, padding) {
 
     var sizeX  = 1,
         sizeY  = 1,
         panels = [];
 
-    images.forEach(function(image) {
-      sizeX = Math.max(sizeX, image[1] + 1);
-      sizey = Math.max(sizeY, image[2] + 1);
+    panelConfig.forEach(function(config) {
+      sizeX = Math.max(sizeX, config.x + 1);
+      sizey = Math.max(sizeY, config.y + 1);
     });
 
     for( var i = 0; i < sizeX ; i++ ) {
       panels[i] = new Array(sizeY);
     }
 
-    images.forEach(function(image, i) {
-      var x = image[1], y = image[2];
-      panels[x][y] = new Panel(image[0], x, y, padding);
+    panelConfig.forEach(function(config, i) {
+      var x = config.x, y = config.y;
+      panels[x][y] = new Panel(config.name,
+                               config.image,
+                               x, y, padding);
     });
 
     return panels;
@@ -102,8 +105,8 @@ var cwine = (function Cwine(canvas, context) {
     // cantered on the first panel
     init: function cwineInit(images) {
       this.panels = loadPanels(images, this.padding);
-      this.startIndex.x = images[0][1];
-      this.startIndex.y = images[0][2];
+      this.startIndex.x = images[0].x;
+      this.startIndex.y = images[0].y;
       this.reset();
     },
 
@@ -194,9 +197,9 @@ var img1    = document.getElementById("yarn"),
     img2    = document.getElementById("laser"),
     img3    = document.getElementById("sunbeam");
 
-var images = [ [img1, 0, 0],
-               [img2, 1, 0],
-               [img3, 2, 0],
-               [img1, 0, 1] ];
+var images = [ { name: "yarn1", image: img1, x: 0, y: 0 },
+               { name: "laser", image: img2, x: 1, y: 0 },
+               { name: "sun",   image: img3, x: 2, y: 0 },
+               { name: "yarn2", image: img1, x: 0, y: 1 } ];
 
 cwine.init(images);
