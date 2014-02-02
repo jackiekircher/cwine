@@ -75,9 +75,6 @@ var cwine = (function Cwine(container) {
      * startPanel: the 'first' panel on the page, where
      *             reading should start
      *
-     * currIndex:  the current x,y coordinates of the view,
-     *             right now this is pretty pointless
-     *
      */
 
     // initialize the canvas by transforming to the identity
@@ -99,58 +96,86 @@ var cwine = (function Cwine(container) {
       this.padding    = padding;
       this.panels     = loadPanels(layer, images, padding);
       this.startPanel = this.panels[images[0].x][images[0].y];
-      this.currIndex  = { x: this.startPanel.xIndex,
-                          y: this.startPanel.yIndex };
 
       this.reset();
     },
 
     right: function cwineRight() {
-      if (this.panels[this.currIndex.x+1] &&
-          this.panels[this.currIndex.x+1][this.currIndex.y]) {
-        this.currIndex.x += 1;
-      }
+      cwine.layer.tween = new Kinetic.Tween({
+        node:     cwine.layer,
+        x:        cwine.layer.x() - 400 - cwine.padding,
+        y:        cwine.layer.y(),
+        easing:   Kinetic.Easings.EaseIn,
+        duration: 0.25
+      });
+
+      cwine.layer.tween.play();
     },
 
     left: function cwineLeft() {
-      if (this.panels[this.currIndex.x-1] &&
-          this.panels[this.currIndex.x-1][this.currIndex.y]) {
-        this.currIndex.x -= 1;
-      }
+      cwine.layer.tween = new Kinetic.Tween({
+        node:     cwine.layer,
+        x:        cwine.layer.x() + 400 + cwine.padding,
+        y:        cwine.layer.y(),
+        easing:   Kinetic.Easings.EaseIn,
+        duration: 0.25
+      });
+
+      cwine.layer.tween.play();
     },
 
     up: function cwineUp() {
-      if (this.panels[this.currIndex.x][this.currIndex.y-1]) {
-        this.currIndex.y -= 1;
-      }
+      cwine.layer.tween = new Kinetic.Tween({
+        node:     cwine.layer,
+        x:        cwine.layer.x(),
+        y:        cwine.layer.y() + 300 + cwine.padding,
+        easing:   Kinetic.Easings.EaseIn,
+        duration: 0.25
+      });
+
+      cwine.layer.tween.play();
     },
 
     down: function cwineDown() {
-      if (this.panels[this.currIndex.x][this.currIndex.y+1]) {
-        this.currIndex.y += 1;
-      }
+      cwine.layer.tween = new Kinetic.Tween({
+        node:     cwine.layer,
+        x:        cwine.layer.x(),
+        y:        cwine.layer.y() - 300 - cwine.padding,
+        easing:   Kinetic.Easings.EaseIn,
+        duration: 0.25
+      });
+
+      cwine.layer.tween.play();
     },
 
     reset: function cwineReset() {
 
       // reset state to start
-      this.currIndex.x = this.startPanel.xIndex;
-      this.currIndex.y = this.startPanel.yIndex;
+      centerX = (cwine.stage.width() / 2) -
+                (cwine.startPanel.width() / 2) -
+                 cwine.startPanel.x();
+      centerY = (cwine.stage.height() / 2) -
+                (cwine.startPanel.height() / 2) -
+                 cwine.startPanel.y();
 
-      centerX = (this.stage.width() / 2) -
-                (this.startPanel.width() / 2) -
-                 this.startPanel.x();
-      centerY = (this.stage.height() / 2) -
-                (this.startPanel.height() / 2) -
-                 this.startPanel.y();
-
-      this.layer.setX(centerX);
-      this.layer.setY(centerY);
-      this.layer.draw();
+      cwine.layer.setX(centerX);
+      cwine.layer.setY(centerY);
+      cwine.layer.draw();
     }
   };
 
 })("cwine");
+
+document.getElementById("left").
+  addEventListener("click", cwine.left, false);
+document.getElementById("up").
+  addEventListener("click", cwine.up, false);
+document.getElementById("down").
+  addEventListener("click", cwine.down, false);
+document.getElementById("right").
+  addEventListener("click", cwine.right, false);
+document.getElementById("reset").
+  addEventListener("click", cwine.reset, false);
 
 var panel1 = { id:    "yarn1",
                image: document.getElementById("yarn"),
