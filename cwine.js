@@ -1,9 +1,19 @@
 var canvas  = document.getElementById("cwine"),
     context = canvas.getContext("2d");
 
+var stage = new Kinetic.Stage({
+                  container: "kinetic-test",
+                  width:     1200,
+                  height:    600
+                });
+var layer = new Kinetic.Layer();
+stage.add(layer);
+
 var cwine = (function Cwine(canvas, context) {
 
   context.draw = function cwineDraw() {
+    layer.draw();
+    /*
     var x = 0, y = 0,
         borderWidth = 3;
 
@@ -12,13 +22,14 @@ var cwine = (function Cwine(canvas, context) {
 
         var panel = cwine.panels[i][j];
         if ( panel !== undefined ) {
-          xPos = panel.xOffset();
-          yPos = panel.yOffset();
+          xPos = panel.x();
+          yPos = panel.y();
           this.drawBorder( panel.image, borderWidth, xPos, yPos );
           this.drawImage( panel.image, xPos, yPos );
         }
       }
     }
+    */
 
   };
 
@@ -65,11 +76,29 @@ var cwine = (function Cwine(canvas, context) {
     }
 
     panelConfig.forEach(function(config, i) {
-      var x = config.x, y = config.y;
-      panels[x][y] = new Panel(config.name,
-                               config.image,
-                               config.paths,
-                               x, y, padding);
+      var x = config.x, y = config.y,
+          xOffset = (x * 420) + 5, yOffset = (y * 320) + 5;
+      panels[x][y] = new Kinetic.Image({
+                       id: config.name,
+                       image: config.image,
+                       stroke: 'black',
+                       strokeWidth: 5,
+                       paths: config.paths,
+                       x: xOffset, y: yOffset
+                     });
+      panels[x][y].on('mousedown toachstart', function() {
+        var centerX = (stage.width() / 2 ) - (panels[x][y].width() / 2);
+        var centerY = (stage.height() / 2 ) - (panels[x][y].height() / 2);
+        layer.tween = new Kinetic.Tween({
+          node: layer,
+          x: centerX - xOffset,
+          y: centerY - yOffset,
+          easing: Kinetic.Easings.EaseIn,
+          duration: 0.5
+        });
+        layer.tween.play();
+      });
+      layer.add(panels[x][y]);
     });
 
     return panels;
@@ -151,30 +180,24 @@ var cwine = (function Cwine(canvas, context) {
       this.animateRight.pause();
 
       // reset state to start
-      this.context.save();
-
       var startPanel = this.panels[this.startIndex.x][this.startIndex.y];
-
-      this.context.setTransform( 1, 0, 0, 1, 0 ,0 );
 
       this.currIndex.x = this.startIndex.x;
       this.currIndex.y = this.startIndex.y;
-      this.pos.x =  (this.canvas.width / 2) - (startPanel.width / 2) - startPanel.xOffset();
-      this.pos.y =  (this.canvas.height / 2) - (startPanel.height / 2) - startPanel.yOffset();
-      this.context.clearRect( 0, 0,
-                              this.canvas.width,
-                              this.canvas.height );
-      this.context.translate( this.pos.x, this.pos.y );
-      this.context.draw(context);
 
-      this.context.restore();
+      this.pos.x =  (stage.width() / 2) - (startPanel.width() / 2) - startPanel.x();
+      this.pos.y =  (stage.height() / 2) - (startPanel.height() / 2) - startPanel.y();
+
+      layer.setX(this.pos.x);
+      layer.setY(this.pos.y);
+      layer.draw();
     }
   };
 
 })(canvas, context);
 
 // setup keybindings to slide the canvas
-var canvas = document.getElementById("cwine");
+var canvas = document.getElementById("kinetic-test");
 canvas.onkeydown = function(event) {
 
   switch(event.keyCode) {
