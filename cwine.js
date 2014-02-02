@@ -1,142 +1,107 @@
-var canvas  = document.getElementById("cwine"),
-    context = canvas.getContext("2d");
+var cwine = (function Cwine(container) {
 
-var stage = new Kinetic.Stage({
-                  container: "kinetic-test",
-                  width:     1200,
-                  height:    600
-                });
-var layer = new Kinetic.Layer();
-stage.add(layer);
+  function loadPanels(layer, panelConfig, padding) {
 
-var cwine = (function Cwine(canvas, context) {
-
-  context.draw = function cwineDraw() {
-    layer.draw();
-    /*
-    var x = 0, y = 0,
-        borderWidth = 3;
-
-    for ( var i = 0; i < cwine.panels.length; i++ ) {
-      for ( var j = 0; j < cwine.panels[i].length; j++ ) {
-
-        var panel = cwine.panels[i][j];
-        if ( panel !== undefined ) {
-          xPos = panel.x();
-          yPos = panel.y();
-          this.drawBorder( panel.image, borderWidth, xPos, yPos );
-          this.drawImage( panel.image, xPos, yPos );
-        }
-      }
-    }
-    */
-
-  };
-
-  context.drawBorder = function cwineDrawBorder(image, width, x, y) {
-
-    this.fillStyle = "rgb(0, 0, 0)";
-    this.fillRect( x - width, y - width,
-                   image.width + width*2, image.height + width*2 );
-  };
-
-  // creates an animation function for a MiniDaemon that
-  // translates the canvas <delta> units along the x axis
-  function cwineSlide(deltaX, deltaY) {
-    return function(index, length, reverse) {
-      cwine.pos.x += deltaX;
-      cwine.pos.y += deltaY;
-
-      this.save();
-
-      this.setTransform( 1, 0, 0, 1, 0 ,0 );
-      this.clearRect( 0, 0,
-                      canvas.width,
-                      canvas.height );
-      this.translate( cwine.pos.x, cwine.pos.y );
-      this.draw();
-
-      this.restore();
-    };
-  }
-
-  function loadPanels(panelConfig, padding) {
-
-    var sizeX  = 1,
+    var stage  = layer.getStage(),
+        sizeX  = 1,
         sizeY  = 1,
         panels = [];
 
+    // determine the size our the page
     panelConfig.forEach(function(config) {
       sizeX = Math.max(sizeX, config.x + 1);
       sizey = Math.max(sizeY, config.y + 1);
     });
 
+    // initialize the page with empty values
     for( var i = 0; i < sizeX ; i++ ) {
       panels[i] = new Array(sizeY);
     }
 
     panelConfig.forEach(function(config, i) {
-      var x = config.x, y = config.y,
-          xOffset = (x * 420) + 5, yOffset = (y * 320) + 5;
-      panels[x][y] = new Kinetic.Image({
-                       id: config.name,
-                       image: config.image,
-                       stroke: 'black',
-                       strokeWidth: 5,
-                       paths: config.paths,
-                       x: xOffset, y: yOffset
-                     });
-      panels[x][y].on('mousedown toachstart', function() {
-        var centerX = (stage.width() / 2 ) - (panels[x][y].width() / 2);
-        var centerY = (stage.height() / 2 ) - (panels[x][y].height() / 2);
+      var x = config.x, xOffset = (x * (400 + padding)) + 5,
+          y = config.y, yOffset = (y * (300 + padding)) + 5;
+
+      panel = new Kinetic.Image({
+                    id:          config.id,
+                    image:       config.image,
+                    x:           xOffset,
+                    y:           yOffset,
+                    stroke:      'black',
+                    strokeWidth: 5,
+                  });
+      panel.paths  = config.paths;
+      panel.xIndex = x;
+      panel.yIndex = y;
+
+      layer.add(panel);
+
+      // center the layer on the current panel whenever it is
+      // clicked
+      panel.on('mousedown toachstart', function(){
+        var centerX = (stage.width()/2) - (this.width()/2);
+        var centerY = (stage.height()/2) - (this.height()/2);
         layer.tween = new Kinetic.Tween({
-          node: layer,
-          x: centerX - xOffset,
-          y: centerY - yOffset,
-          easing: Kinetic.Easings.EaseIn,
-          duration: 0.5
+          node:     layer,
+          x:        centerX - this.x(),
+          y:        centerY - this.y(),
+          easing:   Kinetic.Easings.EaseIn,
+          duration: 0.25
         });
+
         layer.tween.play();
       });
-      layer.add(panels[x][y]);
+
+      panels[x][y] = panel;
     });
 
     return panels;
   }
 
   return {
-    // state
-    canvas:      canvas,
-    context:     context,
-    padding:     20,
-    startIndex:  {},
-    currIndex:   {},
-    pos:         {},
-
-    // animation daemons, each slides the canvas over by
-    // x,y passed to cwineSlide() for given length
-    animateLeft:  new MiniDaemon( context,
-                                  cwineSlide( 20, 0 ),
-                                  1, 21 ),
-    animateRight: new MiniDaemon( context,
-                                  cwineSlide( -20, 0 ),
-                                  1, 21 ),
-    animateUp:    new MiniDaemon( context,
-                                  cwineSlide( 0, 20 ),
-                                  1, 16 ),
-    animateDown:  new MiniDaemon( context,
-                                  cwineSlide( 0, -20 ),
-                                  1, 16 ),
-
-    // actions
+    /* state *******
+     *
+     * stage:      the Kinetic stage associated with the
+     *             container
+     *
+     * layer:      the Kinetic layer that holds all of the
+     *             panels
+     *
+     * padding:    the space between each panel
+     *
+     * panels:     a two-dimensional array that contains
+     *             every image on the page. it may
+     *
+     * startPanel: the 'first' panel on the page, where
+     *             reading should start
+     *
+     * currIndex:  the current x,y coordinates of the view,
+     *             right now this is pretty pointless
+     *
+     */
 
     // initialize the canvas by transforming to the identity
     // matrix, clearing it, then calling context.draw()
     // cantered on the first panel
-    init: function cwineInit(images) {
-      this.panels = loadPanels(images, this.padding);
-      this.startIndex.x = images[0].x;
-      this.startIndex.y = images[0].y;
+    init: function cwineInit(images, padding) {
+
+      var stage = new Kinetic.Stage({
+                        container: container,
+                        width:     1200,
+                        height:    600
+                      }),
+          layer = new Kinetic.Layer();
+
+      stage.add(layer);
+
+      this.stage      = stage;
+      this.layer      = layer;
+      this.padding    = padding;
+      this.panels     = loadPanels(layer, images, padding);
+      this.startPanel = this.panels[images[0].x][images[0].y];
+      this.currIndex  = { x: this.startPanel.xIndex,
+                          y: this.startPanel.yIndex };
+
       this.reset();
     },
 
@@ -144,8 +109,6 @@ var cwine = (function Cwine(canvas, context) {
       if (this.panels[this.currIndex.x+1] &&
           this.panels[this.currIndex.x+1][this.currIndex.y]) {
         this.currIndex.x += 1;
-        this.animateRight.resetIndex();
-        this.animateRight.start();
       }
     },
 
@@ -153,89 +116,61 @@ var cwine = (function Cwine(canvas, context) {
       if (this.panels[this.currIndex.x-1] &&
           this.panels[this.currIndex.x-1][this.currIndex.y]) {
         this.currIndex.x -= 1;
-        this.animateLeft.resetIndex();
-        this.animateLeft.start();
       }
     },
 
     up: function cwineUp() {
       if (this.panels[this.currIndex.x][this.currIndex.y-1]) {
         this.currIndex.y -= 1;
-        this.animateUp.resetIndex();
-        this.animateUp.start();
       }
     },
 
     down: function cwineDown() {
       if (this.panels[this.currIndex.x][this.currIndex.y+1]) {
         this.currIndex.y += 1;
-        this.animateDown.resetIndex();
-        this.animateDown.start();
       }
     },
 
     reset: function cwineReset() {
-      // pause current animation
-      this.animateLeft.pause();
-      this.animateRight.pause();
 
       // reset state to start
-      var startPanel = this.panels[this.startIndex.x][this.startIndex.y];
+      this.currIndex.x = this.startPanel.xIndex;
+      this.currIndex.y = this.startPanel.yIndex;
 
-      this.currIndex.x = this.startIndex.x;
-      this.currIndex.y = this.startIndex.y;
+      centerX = (this.stage.width() / 2) -
+                (this.startPanel.width() / 2) -
+                 this.startPanel.x();
+      centerY = (this.stage.height() / 2) -
+                (this.startPanel.height() / 2) -
+                 this.startPanel.y();
 
-      this.pos.x =  (stage.width() / 2) - (startPanel.width() / 2) - startPanel.x();
-      this.pos.y =  (stage.height() / 2) - (startPanel.height() / 2) - startPanel.y();
-
-      layer.setX(this.pos.x);
-      layer.setY(this.pos.y);
-      layer.draw();
+      this.layer.setX(centerX);
+      this.layer.setY(centerY);
+      this.layer.draw();
     }
   };
 
-})(canvas, context);
+})("cwine");
 
-// setup keybindings to slide the canvas
-var canvas = document.getElementById("kinetic-test");
-canvas.onkeydown = function(event) {
-
-  switch(event.keyCode) {
-
-    case 37:
-      cwine.left();
-      return false;
-    case 38:
-      cwine.up();
-      return false;
-    case 39:
-      cwine.right();
-      return false;
-    case 40:
-      cwine.down();
-      return false;
-  }
-};
-
-var panel1 = { name:  "yarn1",
+var panel1 = { id:    "yarn1",
                image: document.getElementById("yarn"),
                paths: [ "yarn2", "laser" ],
                x:     0,
                y:     0 };
 
-var panel2 = { name:  "yarn2",
+var panel2 = { id:    "yarn2",
                image: document.getElementById("yarn"),
                paths: [ "yarn1" ],
                x:     0,
                y:     1 };
 
-var panel3 = { name:  "laser",
+var panel3 = { id:    "laser",
                image: document.getElementById("laser"),
                paths: [ "yarn, sun" ],
                x:     1,
                y:     0 };
 
-var panel4 = { name:  "sun",
+var panel4 = { id:    "sun",
                image: document.getElementById("sunbeam"),
                paths: [ "laser" ],
                x:     2,
@@ -243,4 +178,4 @@ var panel4 = { name:  "sun",
 
 var images = [ panel1, panel2, panel3, panel4 ];
 
-cwine.init(images);
+cwine.init(images, 20);

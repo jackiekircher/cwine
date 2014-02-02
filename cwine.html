@@ -10,28 +10,23 @@
 #images {
   display: none;
 }
-#cwine {
-  display: none;
-}
 </style>
 </head>
 
 <body>
-  <p>
-    <input type="button" onclick="cwine.right();" value="next panel" />
-    <input type="button" onclick="cwine.left();" value="previous panel">
-    <input type="button" onclick="cwine.reset();" value="reset" />
+  <p style="display: none;">
+    <input type="button" value="next panel" />
+    <input type="button" value="previous panel">
+    <input type="button" value="reset" />
   </p>
 
   <div id="images" style="left: 10px">
-    <img id="yarn" src="yarn-web.png" />
-    <img id="laser" src="laser-web.png" />
+    <img id="yarn"    src="yarn-web.png" />
+    <img id="laser"   src="laser-web.png" />
     <img id="sunbeam" src="sunbeam-web.png" />
   </div>
 
-  <canvas id="cwine" width="1200" height="600" tabindex="0"></canvas>
-
-  <div id="kinetic-test" tabindex="0"></div>
+  <div id="cwine" tabindex="0"></div>
 
   <script type="text/javascript" src="panel.js"></script>
   <script type="text/javascript" src="cwine.js"></script>
