@@ -1,11 +1,15 @@
 var cwine = (function Cwine(container) {
 
-  function loadPanels(layer, panelConfig, padding) {
+  function loadPanels(obj, panelConfig, padding) {
 
-    var stage  = layer.getStage(),
+    var stage  = obj.stage,
+        layer  = obj.layer,
+        group  = obj.panelGroup,
         sizeX  = 1,
-        sizeY  = 1,
-        panels = [];
+        sizeY  = 1;
+
+    obj.panels  = [];
+    obj.indices = {};
 
     // determine the size our the page
     panelConfig.forEach(function(config) {
@@ -15,7 +19,7 @@ var cwine = (function Cwine(container) {
 
     // initialize the page with empty values
     for( var i = 0; i < sizeX ; i++ ) {
-      panels[i] = new Array(sizeY);
+      obj.panels[i] = new Array(sizeY);
     }
 
     panelConfig.forEach(function(config, i) {
@@ -32,7 +36,9 @@ var cwine = (function Cwine(container) {
                   });
       panel.paths = config.paths;
 
-      layer.add(panel);
+      group.add(panel);
+
+      if ( i === 0 ) { obj.startPanel = panel; }
 
       // center the layer on the current panel whenever it is
       // clicked
@@ -50,10 +56,36 @@ var cwine = (function Cwine(container) {
         layer.tween.play();
       });
 
-      panels[x][y] = panel;
+      obj.panels[x][y] = panel;
+      obj.indices[panel.id()] = { x: x,
+                                  y: y };
     });
+  }
 
-    return panels;
+  function loadPaths(group, panels, indices) {
+
+    panels.forEach(function(panelRow) {
+      panelRow.forEach(function(panel){
+
+        //center of panel
+        startX = panel.x() + panel.width()/2;
+        startY = panel.y() + panel.height()/2;
+
+        panel.paths.forEach(function(path) {
+          index    = indices[path];
+          endPanel = panels[index.x][index.y];
+          endX = endPanel.x() + endPanel.width()/2;
+          endY = endPanel.y() + endPanel.height()/2;
+
+          line = new Kinetic.Line({
+                       points: [startX, startY, endX, endY],
+                       stroke: 'black',
+                       strokeWidth: 5,
+                     });
+          group.add(line);
+        });
+      });
+    });
   }
 
   return {
@@ -62,13 +94,22 @@ var cwine = (function Cwine(container) {
      * stage:      the Kinetic stage associated with the
      *             container
      *
-     * layer:      the Kinetic layer that holds all of the
+     * layer:      the Kinetic layer that holds the page
+     *
+     * panelGroup: a Kinetic group that holds all of the
      *             panels
+     *
+     * pathsGroup: a Kinetic group that holds all of the
+     *             path lines between panels. it is always
+     *             the bottom-most group.
      *
      * padding:    the space between each panel
      *
      * panels:     a two-dimensional array that contains
      *             every image on the page. it may
+     *
+     * indices:    a lookup table between panel ids and their
+     *             index in the panels array.
      *
      * startPanel: the 'first' panel on the page, where
      *             reading should start
@@ -85,15 +126,23 @@ var cwine = (function Cwine(container) {
                         width:     1200,
                         height:    600
                       }),
-          layer = new Kinetic.Layer();
+          layer = new Kinetic.Layer(),
+          panelGroup = new Kinetic.Group(),
+          pathsGroup = new Kinetic.Group();
 
+      layer.add(panelGroup);
+      layer.add(pathsGroup);
       stage.add(layer);
 
       this.stage      = stage;
       this.layer      = layer;
+      this.panelGroup = panelGroup;
+      this.pathsGroup = pathsGroup;
       this.padding    = padding;
-      this.panels     = loadPanels(layer, images, padding);
-      this.startPanel = this.panels[images[0].x][images[0].y];
+
+      this.pathsGroup.moveToBottom();
+      loadPanels(this, images, padding);
+      loadPaths(this.pathsGroup, this.panels, this.indices);
 
       this.reset();
     },
@@ -190,7 +239,7 @@ var panel2 = { id:    "yarn2",
 
 var panel3 = { id:    "laser",
                image: document.getElementById("laser"),
-               paths: [ "yarn, sun" ],
+               paths: [ "yarn1", "sun" ],
                x:     1,
                y:     0 };
 
