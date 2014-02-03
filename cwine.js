@@ -99,66 +99,66 @@ var cwine = (function Cwine(container) {
     },
 
     right: function cwineRight() {
-      cwine.layer.tween = new Kinetic.Tween({
-        node:     cwine.layer,
-        x:        cwine.layer.x() - 400 - cwine.padding,
-        y:        cwine.layer.y(),
+      this.layer.tween = new Kinetic.Tween({
+        node:     this.layer,
+        x:        this.layer.x() - 400 - this.padding,
+        y:        this.layer.y(),
         easing:   Kinetic.Easings.EaseIn,
         duration: 0.25
       });
 
-      cwine.layer.tween.play();
+      this.layer.tween.play();
     },
 
     left: function cwineLeft() {
-      cwine.layer.tween = new Kinetic.Tween({
-        node:     cwine.layer,
-        x:        cwine.layer.x() + 400 + cwine.padding,
-        y:        cwine.layer.y(),
+      this.layer.tween = new Kinetic.Tween({
+        node:     this.layer,
+        x:        this.layer.x() + 400 + this.padding,
+        y:        this.layer.y(),
         easing:   Kinetic.Easings.EaseIn,
         duration: 0.25
       });
 
-      cwine.layer.tween.play();
+      this.layer.tween.play();
     },
 
     up: function cwineUp() {
-      cwine.layer.tween = new Kinetic.Tween({
-        node:     cwine.layer,
-        x:        cwine.layer.x(),
-        y:        cwine.layer.y() + 300 + cwine.padding,
+      this.layer.tween = new Kinetic.Tween({
+        node:     this.layer,
+        x:        this.layer.x(),
+        y:        this.layer.y() + 300 + this.padding,
         easing:   Kinetic.Easings.EaseIn,
         duration: 0.25
       });
 
-      cwine.layer.tween.play();
+      this.layer.tween.play();
     },
 
     down: function cwineDown() {
-      cwine.layer.tween = new Kinetic.Tween({
-        node:     cwine.layer,
-        x:        cwine.layer.x(),
-        y:        cwine.layer.y() - 300 - cwine.padding,
+      this.layer.tween = new Kinetic.Tween({
+        node:     this.layer,
+        x:        this.layer.x(),
+        y:        this.layer.y() - 300 - this.padding,
         easing:   Kinetic.Easings.EaseIn,
         duration: 0.25
       });
 
-      cwine.layer.tween.play();
+      this.layer.tween.play();
     },
 
     reset: function cwineReset() {
 
       // reset state to start
-      centerX = (cwine.stage.width() / 2) -
-                (cwine.startPanel.width() / 2) -
-                 cwine.startPanel.x();
-      centerY = (cwine.stage.height() / 2) -
-                (cwine.startPanel.height() / 2) -
-                 cwine.startPanel.y();
+      centerX = (this.stage.width() / 2) -
+                (this.startPanel.width() / 2) -
+                 this.startPanel.x();
+      centerY = (this.stage.height() / 2) -
+                (this.startPanel.height() / 2) -
+                 this.startPanel.y();
 
-      cwine.layer.setX(centerX);
-      cwine.layer.setY(centerY);
-      cwine.layer.draw();
+      this.layer.setX(centerX);
+      this.layer.setY(centerY);
+      this.layer.draw();
     }
   };
 
@@ -166,15 +166,15 @@ var cwine = (function Cwine(container) {
 
 // setup navigation buttons
 document.getElementById("left").
-  addEventListener("click", cwine.left, false);
+  addEventListener("click", cwine.left.bind(cwine), false);
 document.getElementById("up").
-  addEventListener("click", cwine.up, false);
+  addEventListener("click", cwine.up.bind(cwine), false);
 document.getElementById("down").
-  addEventListener("click", cwine.down, false);
+  addEventListener("click", cwine.down.bind(cwine), false);
 document.getElementById("right").
-  addEventListener("click", cwine.right, false);
+  addEventListener("click", cwine.right.bind(cwine), false);
 document.getElementById("reset").
-  addEventListener("click", cwine.reset, false);
+  addEventListener("click", cwine.reset.bind(cwine), false);
 
 var panel1 = { id:    "yarn1",
                image: document.getElementById("yarn"),
