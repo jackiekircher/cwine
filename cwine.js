@@ -3,8 +3,7 @@ var cwine = (function Cwine(container) {
   function loadPanels(obj, panelConfig, padding) {
 
     var stage  = obj.stage,
-        layer  = obj.layer,
-        group  = obj.panelGroup,
+        group  = obj.pageGroup,
         sizeX  = 1,
         sizeY  = 1;
 
@@ -40,20 +39,20 @@ var cwine = (function Cwine(container) {
 
       if ( i === 0 ) { obj.startPanel = panel; }
 
-      // center the layer on the current panel whenever it is
+      // center the group on the current panel whenever it is
       // clicked
       panel.on('mousedown toachstart', function(){
         var centerX = (stage.width()/2) - (this.width()/2);
         var centerY = (stage.height()/2) - (this.height()/2);
-        layer.tween = new Kinetic.Tween({
-          node:     layer,
+        group.tween = new Kinetic.Tween({
+          node:     group,
           x:        centerX - this.x(),
           y:        centerY - this.y(),
           easing:   Kinetic.Easings.EaseIn,
           duration: 0.25
         });
 
-        layer.tween.play();
+        group.tween.play();
       });
 
       obj.panels[x][y] = panel;
@@ -88,6 +87,68 @@ var cwine = (function Cwine(container) {
     });
   }
 
+  function loadUI(group) {
+    var left  = document.getElementById("arrow-left"),
+        up    = document.getElementById("arrow-up"),
+        down  = document.getElementById("arrow-down"),
+        right = document.getElementById("arrow-right"),
+        loop  = document.getElementById("arrow-loop");
+
+    var uiLeft = new Kinetic.Image({
+                       image: left,
+                       x: 0,
+                       y: 0
+                     });
+    uiLeft.on("mousedown touchstart", cwine.left.bind(cwine));
+
+    var uiUp = new Kinetic.Image({
+                       image: up,
+                       x: 40,
+                       y: 0
+                     });
+    uiUp.on("mousedown touchstart", cwine.up.bind(cwine));
+
+    var uiDown = new Kinetic.Image({
+                       image: down,
+                       x: 80,
+                       y: 0
+                     });
+    uiDown.on("mousedown touchstart", cwine.down.bind(cwine));
+
+    var uiRight = new Kinetic.Image({
+                       image: right,
+                       x: 120,
+                       y: 0
+                     });
+    uiRight.on("mousedown touchstart", cwine.right.bind(cwine));
+
+    var uiLoop = new Kinetic.Image({
+                       image: loop,
+                       x: group.getStage().width() - 40,
+                       y: 0
+                     });
+    uiLoop.on("mousedown touchstart", cwine.reset.bind(cwine));
+
+    group.add(uiLeft);
+    group.add(uiUp);
+    group.add(uiDown);
+    group.add(uiRight);
+    group.add(uiLoop);
+
+    group.tween = new Kinetic.Tween({
+                        node:     group,
+                        opacity:  1.0,
+                        duration: 0.1
+                      });
+    group.on("mouseover", function() {
+      group.tween.play();
+    });
+    group.on("mouseout", function() {
+      group.tween.reverse();
+    });
+
+  }
+
   return {
     /* state *******
      *
@@ -102,6 +163,9 @@ var cwine = (function Cwine(container) {
      * pathsGroup: a Kinetic group that holds all of the
      *             path lines between panels. it is always
      *             the bottom-most group.
+     *
+     * uiGroup:    a Kinetic group that holds all of the
+     *             UI elemnts.
      *
      * padding:    the space between each panel
      *
@@ -127,72 +191,79 @@ var cwine = (function Cwine(container) {
                         height:    600
                       }),
           layer = new Kinetic.Layer(),
+          pageGroup  = new Kinetic.Group(),
           panelGroup = new Kinetic.Group(),
-          pathsGroup = new Kinetic.Group();
+          pathsGroup = new Kinetic.Group(),
+          uiGroup    = new Kinetic.Group({ opacity: 0.4 });
 
-      layer.add(panelGroup);
-      layer.add(pathsGroup);
+      pageGroup.add(panelGroup);
+      pageGroup.add(pathsGroup);
+      layer.add(pageGroup);
+      layer.add(uiGroup);
       stage.add(layer);
 
       this.stage      = stage;
       this.layer      = layer;
       this.panelGroup = panelGroup;
       this.pathsGroup = pathsGroup;
+      this.pageGroup  = pageGroup;
+      this.uiGroup    = uiGroup;
       this.padding    = padding;
 
       this.pathsGroup.moveToBottom();
       loadPanels(this, images, padding);
       loadPaths(this.pathsGroup, this.panels, this.indices);
+      loadUI(this.uiGroup);
 
       this.reset();
     },
 
     right: function cwineRight() {
-      this.layer.tween = new Kinetic.Tween({
-        node:     this.layer,
-        x:        this.layer.x() - 400 - this.padding,
-        y:        this.layer.y(),
+      this.pageGroup.tween = new Kinetic.Tween({
+        node:     this.pageGroup,
+        x:        this.pageGroup.x() - 400 - this.padding,
+        y:        this.pageGroup.y(),
         easing:   Kinetic.Easings.EaseIn,
         duration: 0.25
       });
 
-      this.layer.tween.play();
+      this.pageGroup.tween.play();
     },
 
     left: function cwineLeft() {
-      this.layer.tween = new Kinetic.Tween({
-        node:     this.layer,
-        x:        this.layer.x() + 400 + this.padding,
-        y:        this.layer.y(),
+      this.pageGroup.tween = new Kinetic.Tween({
+        node:     this.pageGroup,
+        x:        this.pageGroup.x() + 400 + this.padding,
+        y:        this.pageGroup.y(),
         easing:   Kinetic.Easings.EaseIn,
         duration: 0.25
       });
 
-      this.layer.tween.play();
+      this.pageGroup.tween.play();
     },
 
     up: function cwineUp() {
-      this.layer.tween = new Kinetic.Tween({
-        node:     this.layer,
-        x:        this.layer.x(),
-        y:        this.layer.y() + 300 + this.padding,
+      this.pageGroup.tween = new Kinetic.Tween({
+        node:     this.pageGroup,
+        x:        this.pageGroup.x(),
+        y:        this.pageGroup.y() + 300 + this.padding,
         easing:   Kinetic.Easings.EaseIn,
         duration: 0.25
       });
 
-      this.layer.tween.play();
+      this.pageGroup.tween.play();
     },
 
     down: function cwineDown() {
-      this.layer.tween = new Kinetic.Tween({
-        node:     this.layer,
-        x:        this.layer.x(),
-        y:        this.layer.y() - 300 - this.padding,
+      this.pageGroup.tween = new Kinetic.Tween({
+        node:     this.pageGroup,
+        x:        this.pageGroup.x(),
+        y:        this.pageGroup.y() - 300 - this.padding,
         easing:   Kinetic.Easings.EaseIn,
         duration: 0.25
       });
 
-      this.layer.tween.play();
+      this.pageGroup.tween.play();
     },
 
     reset: function cwineReset() {
@@ -205,25 +276,13 @@ var cwine = (function Cwine(container) {
                 (this.startPanel.height() / 2) -
                  this.startPanel.y();
 
-      this.layer.setX(centerX);
-      this.layer.setY(centerY);
+      this.pageGroup.setX(centerX);
+      this.pageGroup.setY(centerY);
       this.layer.draw();
     }
   };
 
 })("cwine");
-
-// setup navigation buttons
-document.getElementById("left").
-  addEventListener("click", cwine.left.bind(cwine), false);
-document.getElementById("up").
-  addEventListener("click", cwine.up.bind(cwine), false);
-document.getElementById("down").
-  addEventListener("click", cwine.down.bind(cwine), false);
-document.getElementById("right").
-  addEventListener("click", cwine.right.bind(cwine), false);
-document.getElementById("reset").
-  addEventListener("click", cwine.reset.bind(cwine), false);
 
 var panel1 = { id:    "yarn1",
                image: document.getElementById("yarn"),

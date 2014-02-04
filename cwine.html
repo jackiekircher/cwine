@@ -10,25 +10,33 @@
 #images {
   display: none;
 }
+#buttons {
+  display: none;
+}
 </style>
 </head>
 
 <body>
-  <p>
+  <div id="buttons">
     <input type="button" id="left"  value="left"  />
     <input type="button" id="up"    value="up"    />
     <input type="button" id="down"  value="down"  />
     <input type="button" id="right" value="right" />
     <input type="button" id="reset" value="reset" />
-  </p>
+  </div>
 
   <div id="images" style="left: 10px">
     <img id="yarn"    src="yarn-web.png" />
     <img id="laser"   src="laser-web.png" />
     <img id="sunbeam" src="sunbeam-web.png" />
+    <img id="arrow-left"  src="arrow-left.png" />
+    <img id="arrow-up"    src="arrow-up.png" />
+    <img id="arrow-down"  src="arrow-down.png" />
+    <img id="arrow-right" src="arrow-right.png" />
+    <img id="arrow-loop"  src="arrow-loop.png" />
   </div>
 
-  <div id="cwine" tabindex="0"></div>
+  <div id="cwine"></div>
 
   <script type="text/javascript" src="panel.js"></script>
   <script type="text/javascript" src="cwine.js"></script>
