@@ -95,10 +95,10 @@ var cwine = (function Cwine(container) {
   function loadUI(layer) {
     var arrows   = document.getElementById("arrows");
     var elements = [
-      { x: 0,  y: 20, fn: cwine.left.bind(cwine)  },
-      { x: 40, y: 0,  fn: cwine.up.bind(cwine)    },
-      { x: 40, y: 40, fn: cwine.down.bind(cwine)  },
-      { x: 80, y: 20, fn: cwine.right.bind(cwine) },
+      { x: 0,  y: 20, fn: cwine.slide.bind(cwine, "left")  },
+      { x: 40, y: 0,  fn: cwine.slide.bind(cwine, "up")    },
+      { x: 40, y: 40, fn: cwine.slide.bind(cwine, "down")  },
+      { x: 80, y: 20, fn: cwine.slide.bind(cwine, "right") },
       { x: layer.getStage().width() - 40, y: 20,
         fn: cwine.reset.bind(cwine) }
     ];
@@ -186,7 +186,10 @@ var cwine = (function Cwine(container) {
       this.ui         = ui;
       this.panelGroup = panelGroup;
       this.pathsGroup = pathsGroup;
-      this.padding    = padding;
+
+      this.panelWidth  = 400;
+      this.panelHeight = 300;
+      this.padding     = padding;
 
       this.pathsGroup.moveToBottom();
       loadPanels(this, images, padding);
@@ -196,47 +199,22 @@ var cwine = (function Cwine(container) {
       this.reset();
     },
 
-    right: function cwineRight() {
+    slide: function cwineSlide(direction) {
+      // panelWidth and panelHeight must be consistent
+      // for a slide UI to work
+      var x = { left:  this.panelWidth + this.padding,
+                up:    0,
+                down:  0,
+                right: -this.panelWidth - this.padding },
+          y = { left:  0,
+                up:    this.panelHeight + this.padding,
+                down: -this.panelHeight - this.padding,
+                right: 0 };
+
       this.page.tween = new Kinetic.Tween({
         node:     this.page,
-        x:        this.page.x() - 400 - this.padding,
-        y:        this.page.y(),
-        easing:   Kinetic.Easings.EaseIn,
-        duration: 0.25
-      });
-
-      this.page.tween.play();
-    },
-
-    left: function cwineLeft() {
-      this.page.tween = new Kinetic.Tween({
-        node:     this.page,
-        x:        this.page.x() + 400 + this.padding,
-        y:        this.page.y(),
-        easing:   Kinetic.Easings.EaseIn,
-        duration: 0.25
-      });
-
-      this.page.tween.play();
-    },
-
-    up: function cwineUp() {
-      this.page.tween = new Kinetic.Tween({
-        node:     this.page,
-        x:        this.page.x(),
-        y:        this.page.y() + 300 + this.padding,
-        easing:   Kinetic.Easings.EaseIn,
-        duration: 0.25
-      });
-
-      this.page.tween.play();
-    },
-
-    down: function cwineDown() {
-      this.page.tween = new Kinetic.Tween({
-        node:     this.page,
-        x:        this.page.x(),
-        y:        this.page.y() - 300 - this.padding,
+        x:        this.page.x() + x[direction],
+        y:        this.page.y() + y[direction],
         easing:   Kinetic.Easings.EaseIn,
         duration: 0.25
       });
