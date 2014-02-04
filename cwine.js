@@ -1,3 +1,8 @@
+Kinetic.Image.prototype.sprite = function(x, y, width, height) {
+  this.setAttrs({ width: width, height: height });
+  this.crop({ x: x, y: y, width: width, height: height });
+};
+
 var cwine = (function Cwine(container) {
 
   function loadPanels(obj, panelConfig, padding) {
@@ -88,45 +93,46 @@ var cwine = (function Cwine(container) {
   }
 
   function loadUI(group) {
-    var left  = document.getElementById("arrow-left"),
-        up    = document.getElementById("arrow-up"),
-        down  = document.getElementById("arrow-down"),
-        right = document.getElementById("arrow-right"),
-        loop  = document.getElementById("arrow-loop");
+    var arrows = document.getElementById("arrows");
 
     var uiLeft = new Kinetic.Image({
-                       image: left,
+                       image: arrows,
                        x: 0,
-                       y: 0
+                       y: 0,
                      });
+    uiLeft.sprite( 0, 0, 40, 40 );
     uiLeft.on("mousedown touchstart", cwine.left.bind(cwine));
 
     var uiUp = new Kinetic.Image({
-                       image: up,
+                       image: arrows,
                        x: 40,
                        y: 0
                      });
+    uiUp.sprite( 40, 0, 40, 40 );
     uiUp.on("mousedown touchstart", cwine.up.bind(cwine));
 
     var uiDown = new Kinetic.Image({
-                       image: down,
+                       image: arrows,
                        x: 80,
                        y: 0
                      });
+    uiDown.sprite( 80, 0, 40, 40 );
     uiDown.on("mousedown touchstart", cwine.down.bind(cwine));
 
     var uiRight = new Kinetic.Image({
-                       image: right,
+                       image: arrows,
                        x: 120,
                        y: 0
                      });
+    uiRight.sprite( 120, 0, 40, 40 );
     uiRight.on("mousedown touchstart", cwine.right.bind(cwine));
 
     var uiLoop = new Kinetic.Image({
-                       image: loop,
+                       image: arrows,
                        x: group.getStage().width() - 40,
                        y: 0
                      });
+    uiLoop.sprite( 160, 0, 40, 40 );
     uiLoop.on("mousedown touchstart", cwine.reset.bind(cwine));
 
     group.add(uiLeft);
