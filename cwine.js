@@ -93,53 +93,27 @@ var cwine = (function Cwine(container) {
   }
 
   function loadUI(group) {
-    var arrows = document.getElementById("arrows");
+    var arrows   = document.getElementById("arrows");
+    var elements = [
+      { x: 0,  y: 20, fn: cwine.left.bind(cwine)  },
+      { x: 40, y: 0,  fn: cwine.up.bind(cwine)    },
+      { x: 40, y: 40, fn: cwine.down.bind(cwine)  },
+      { x: 80, y: 20, fn: cwine.right.bind(cwine) },
+      { x: group.getStage().width() - 40, y: 20,
+        fn: cwine.reset.bind(cwine) }
+    ];
 
-    var uiLeft = new Kinetic.Image({
-                       image: arrows,
-                       x: 0,
-                       y: 0,
-                     });
-    uiLeft.sprite( 0, 0, 40, 40 );
-    uiLeft.on("mousedown touchstart", cwine.left.bind(cwine));
+    elements.forEach(function(element, i) {
+      var image = new Kinetic.Image({
+                        image: arrows,
+                        x: element.x,
+                        y: element.y,
+                      });
+      image.sprite( i*40, 0, 40, 40 );
+      image.on("mousedown touchstart", element.fn);
 
-    var uiUp = new Kinetic.Image({
-                       image: arrows,
-                       x: 40,
-                       y: 0
-                     });
-    uiUp.sprite( 40, 0, 40, 40 );
-    uiUp.on("mousedown touchstart", cwine.up.bind(cwine));
-
-    var uiDown = new Kinetic.Image({
-                       image: arrows,
-                       x: 80,
-                       y: 0
-                     });
-    uiDown.sprite( 80, 0, 40, 40 );
-    uiDown.on("mousedown touchstart", cwine.down.bind(cwine));
-
-    var uiRight = new Kinetic.Image({
-                       image: arrows,
-                       x: 120,
-                       y: 0
-                     });
-    uiRight.sprite( 120, 0, 40, 40 );
-    uiRight.on("mousedown touchstart", cwine.right.bind(cwine));
-
-    var uiLoop = new Kinetic.Image({
-                       image: arrows,
-                       x: group.getStage().width() - 40,
-                       y: 0
-                     });
-    uiLoop.sprite( 160, 0, 40, 40 );
-    uiLoop.on("mousedown touchstart", cwine.reset.bind(cwine));
-
-    group.add(uiLeft);
-    group.add(uiUp);
-    group.add(uiDown);
-    group.add(uiRight);
-    group.add(uiLoop);
+      group.add(image);
+    });
 
     group.tween = new Kinetic.Tween({
                         node:     group,
@@ -149,7 +123,7 @@ var cwine = (function Cwine(container) {
     group.on("mouseover", function() {
       group.tween.play();
     });
-    group.on("mouseout", function() {
+    group.on("mouseout",  function() {
       group.tween.reverse();
     });
 
