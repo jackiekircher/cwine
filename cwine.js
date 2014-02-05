@@ -27,8 +27,10 @@ var cwine = (function Cwine(container) {
     }
 
     panelConfig.forEach(function(config, i) {
-      var x = config.x, xOffset = (x * (400 + padding)) + 5,
-          y = config.y, yOffset = (y * (300 + padding)) + 5;
+      var x = config.x,
+          xOffset = (x * (obj.panelWidth + padding)) + 5,
+          y = config.y,
+          yOffset = (y * (obj.panelHeight + padding)) + 5;
 
       panel = new Kinetic.Image({
                     id:          config.id,
@@ -164,7 +166,7 @@ var cwine = (function Cwine(container) {
     // initialize the canvas by transforming to the identity
     // matrix, clearing it, then calling context.draw()
     // cantered on the first panel
-    init: function cwineInit(images, padding) {
+    init: function cwineInit(config) {
 
       var stage = new Kinetic.Stage({
                         container: container,
@@ -187,12 +189,12 @@ var cwine = (function Cwine(container) {
       this.panelGroup = panelGroup;
       this.pathsGroup = pathsGroup;
 
-      this.panelWidth  = 400;
-      this.panelHeight = 300;
-      this.padding     = padding;
+      this.panelWidth  = config.panelWidth;
+      this.panelHeight = config.panelHeight;
+      this.padding     = config.padding;
 
       this.pathsGroup.moveToBottom();
-      loadPanels(this, images, padding);
+      loadPanels(this, config.panels, this.padding);
       loadPaths(this.pathsGroup, this.panels, this.indices);
       loadUI(this.ui);
 
@@ -240,30 +242,34 @@ var cwine = (function Cwine(container) {
 
 })("cwine");
 
-var panel1 = { id:    "yarn1",
-               image: document.getElementById("yarn"),
-               paths: [ "yarn2", "laser" ],
-               x:     0,
-               y:     0 };
-
-var panel2 = { id:    "yarn2",
-               image: document.getElementById("yarn"),
-               paths: [ "yarn1" ],
+var panel1 = { id:    "west_of_house",
+               image: document.getElementById("west"),
+               paths: [ "north_of_house", "south_of_house" ],
                x:     0,
                y:     1 };
 
-var panel3 = { id:    "laser",
-               image: document.getElementById("laser"),
-               paths: [ "yarn1", "sun" ],
+var panel2 = { id:    "north_of_house",
+               image: document.getElementById("north"),
+               paths: [ "west_of_house", "behind_house" ],
                x:     1,
                y:     0 };
 
-var panel4 = { id:    "sun",
-               image: document.getElementById("sunbeam"),
-               paths: [ "laser" ],
+var panel3 = { id:    "behind_house",
+               image: document.getElementById("east"),
+               paths: [ "north_of_house", "south_of_house" ],
                x:     2,
-               y:     0 };
+               y:     1 };
 
-var images = [ panel1, panel2, panel3, panel4 ];
+var panel4 = { id:    "south_of_house",
+               image: document.getElementById("south"),
+               paths: [ "west_of_house", "behind_house" ],
+               x:     1,
+               y:     2 };
 
-cwine.init(images, 20);
+
+cwine.init({
+  panels:      [ panel1, panel2, panel3, panel4 ],
+  padding:     40,
+  panelWidth:  240,
+  panelHeight: 240
+});
