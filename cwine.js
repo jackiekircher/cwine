@@ -39,6 +39,7 @@ var cwine = (function Cwine(container) {
                     y:           yOffset,
                     stroke:      'black',
                     strokeWidth: 5,
+                    visible:     false
                   });
       panel.paths = config.paths;
 
@@ -46,25 +47,39 @@ var cwine = (function Cwine(container) {
 
       if ( i === 0 ) { obj.startPanel = panel; }
 
-      // center the layer on the current panel whenever it is
-      // clicked
-      panel.on('mousedown toachstart', function(){
-        var centerX = (stage.width()/2) - (this.width()/2);
-        var centerY = (stage.height()/2) - (this.height()/2);
-        layer.tween = new Kinetic.Tween({
-          node:     layer,
-          x:        centerX - this.x(),
-          y:        centerY - this.y(),
-          easing:   Kinetic.Easings.EaseIn,
-          duration: 0.25
-        });
-
-        layer.tween.play();
-      });
 
       obj.panels[x][y] = panel;
       obj.indices[panel.id()] = { x: x,
                                   y: y };
+    });
+
+    obj.panels.forEach(function(panelRow, i) {
+      panelRow.forEach(function(panel, j) {
+        // center the layer on the current panel whenever
+        // it is clicked
+        panel.on('mousedown toachstart', function(){
+          var centerX = (stage.width()/2) - (this.width()/2);
+          var centerY = (stage.height()/2) - (this.height()/2);
+          layer.tween = new Kinetic.Tween({
+            node:     layer,
+            x:        centerX - this.x(),
+            y:        centerY - this.y(),
+            easing:   Kinetic.Easings.EaseIn,
+            duration: 0.25
+          });
+
+          layer.tween.play();
+
+          // reveal connected panels
+          panel.paths.forEach(function(path) {
+            var index = obj.indices[path];
+            var tarPanel = obj.panels[index.x][index.y];
+
+            tarPanel.show();
+          });
+          layer.draw();
+        });
+      });
     });
   }
 
@@ -236,6 +251,8 @@ var cwine = (function Cwine(container) {
 
       this.page.setX(centerX);
       this.page.setY(centerY);
+
+      this.startPanel.show();
       this.page.draw();
     }
   };
