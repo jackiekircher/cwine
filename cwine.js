@@ -41,6 +41,7 @@ var cwine = (function Cwine(container) {
                                    y: obj.panelHeight/2 },
                     stroke:      'black',
                     strokeWidth: 5,
+                    scale:       { x: 0.8, y: 0.8 },
                     visible:     false
                   });
       panel.paths = config.paths;
@@ -72,12 +73,19 @@ var cwine = (function Cwine(container) {
 
           // reveal connected panels
           panel.paths.forEach(function(path) {
-            var index = obj.indices[path];
-            var tarPanel = obj.panels[index.x][index.y];
+            var index       = obj.indices[path];
+            var targetPanel = obj.panels[index.x][index.y];
 
-            tarPanel.show();
+            targetPanel.show();
+            targetPanel.tween = new Kinetic.Tween({
+              node:     targetPanel,
+              scaleX:   1.0,
+              scaleY:   1.0,
+              easing:   Kinetic.Easings.ElasticEaseOut,
+              duration: 0.4
+            });
+            targetPanel.tween.play();
           });
-          layer.draw();
         });
       });
     });
@@ -250,6 +258,7 @@ var cwine = (function Cwine(container) {
       this.page.setX(centerX);
       this.page.setY(centerY);
 
+      this.startPanel.scale({x: 1, y: 1});
       this.startPanel.show();
       this.page.draw();
     }
