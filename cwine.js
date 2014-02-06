@@ -37,6 +37,8 @@ var cwine = (function Cwine(container) {
                     image:       config.image,
                     x:           xOffset,
                     y:           yOffset,
+                    offset:      { x: obj.panelWidth/2,
+                                   y: obj.panelHeight/2 },
                     stroke:      'black',
                     strokeWidth: 5,
                     visible:     false
@@ -58,12 +60,10 @@ var cwine = (function Cwine(container) {
         // center the layer on the current panel whenever
         // it is clicked
         panel.on('mousedown toachstart', function(){
-          var centerX = (stage.width()/2) - (this.width()/2);
-          var centerY = (stage.height()/2) - (this.height()/2);
           layer.tween = new Kinetic.Tween({
             node:     layer,
-            x:        centerX - this.x(),
-            y:        centerY - this.y(),
+            x:        stage.width()/2  - this.x(),
+            y:        stage.height()/2 - this.y(),
             easing:   Kinetic.Easings.EaseIn,
             duration: 0.25
           });
@@ -89,14 +89,14 @@ var cwine = (function Cwine(container) {
       panelRow.forEach(function(panel){
 
         //center of panel
-        startX = panel.x() + panel.width()/2;
-        startY = panel.y() + panel.height()/2;
+        startX = panel.x();
+        startY = panel.y();
 
         panel.paths.forEach(function(path) {
           index    = indices[path];
           endPanel = panels[index.x][index.y];
-          endX = endPanel.x() + endPanel.width()/2;
-          endY = endPanel.y() + endPanel.height()/2;
+          endX = endPanel.x();
+          endY = endPanel.y();
 
           line = new Kinetic.Line({
                        points: [startX, startY, endX, endY],
@@ -243,10 +243,8 @@ var cwine = (function Cwine(container) {
 
       // reset state to start
       centerX = (this.stage.width() / 2) -
-                (this.startPanel.width() / 2) -
                  this.startPanel.x();
       centerY = (this.stage.height() / 2) -
-                (this.startPanel.height() / 2) -
                  this.startPanel.y();
 
       this.page.setX(centerX);
