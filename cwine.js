@@ -73,8 +73,7 @@ var cwine = (function Cwine(container) {
 
           // reveal connected panels
           panel.paths.forEach(function(path) {
-            var index       = obj.indices[path];
-            var targetPanel = obj.panels[index.x][index.y];
+            var targetPanel = cwine.getPanel(path);
 
             targetPanel.show();
             targetPanel.tween = new Kinetic.Tween({
@@ -91,7 +90,7 @@ var cwine = (function Cwine(container) {
     });
   }
 
-  function loadPaths(group, panels, indices) {
+  function loadPaths(group, panels) {
 
     panels.forEach(function(panelRow) {
       panelRow.forEach(function(panel){
@@ -101,8 +100,7 @@ var cwine = (function Cwine(container) {
         startY = panel.y();
 
         panel.paths.forEach(function(path) {
-          index    = indices[path];
-          endPanel = panels[index.x][index.y];
+          endPanel = cwine.getPanel(path);
           endX = endPanel.x();
           endY = endPanel.y();
 
@@ -218,10 +216,15 @@ var cwine = (function Cwine(container) {
 
       this.pathsGroup.moveToBottom();
       loadPanels(this, config.panels, this.padding);
-      loadPaths(this.pathsGroup, this.panels, this.indices);
+      loadPaths(this.pathsGroup, this.panels);
       loadUI(this.ui);
 
       this.reset();
+    },
+
+    getPanel: function cwineGetPanel(id) {
+      var index = this.indices[id];
+      return this.panels[index.x][index.y];
     },
 
     slide: function cwineSlide(direction) {
