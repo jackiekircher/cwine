@@ -48,7 +48,11 @@ var cwine = (function Cwine(container) {
 
       layer.add(panel);
 
-      if ( i === 0 ) { obj.startPanel = panel; }
+      if ( i === 0 ) {
+        panel.scale({ x: 1, y: 1 });
+        panel.show();
+        obj.startPanel = panel;
+      }
 
 
       obj.panels[x][y] = panel;
@@ -259,8 +263,7 @@ var cwine = (function Cwine(container) {
       this.page.setX(centerX);
       this.page.setY(centerY);
 
-      this.startPanel.scale({x: 1, y: 1});
-      this.startPanel.show();
+      this.startPanel.fire("mousedown");
       this.page.draw();
     }
   };
