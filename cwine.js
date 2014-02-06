@@ -41,16 +41,12 @@ var cwine = (function Cwine(container) {
                                    y: obj.panelHeight/2 },
                     stroke:      'black',
                     strokeWidth: 5,
-                    scale:       { x: 0.8, y: 0.8 },
-                    visible:     false
                   });
       panel.paths = config.paths;
 
       layer.add(panel);
 
       if ( i === 0 ) {
-        panel.scale({ x: 1, y: 1 });
-        panel.show();
         obj.startPanel = panel;
       }
 
@@ -229,6 +225,21 @@ var cwine = (function Cwine(container) {
       return this.panels[index.x][index.y];
     },
 
+    hidePanels: function cwineHidePanels() {
+      this.panels.forEach(function(panelRow) {
+        panelRow.forEach(function(panel) {
+          if ( panel !== this.startPanel ) {
+            panel.scale({ x: 0.8, y: 0.8 });
+            panel.hide();
+          }
+        }, this);
+      }, this);
+
+      this.pathsGroup.getChildren().each(function(path) {
+        path.hide();
+      });
+    },
+
     slide: function cwineSlide(direction) {
       // panelWidth and panelHeight must be consistent
       // for a slide UI to work
@@ -263,6 +274,7 @@ var cwine = (function Cwine(container) {
       this.page.setX(centerX);
       this.page.setY(centerY);
 
+      this.hidePanels();
       this.startPanel.fire("mousedown");
       this.page.draw();
     }
