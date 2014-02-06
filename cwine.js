@@ -84,35 +84,34 @@ var cwine = (function Cwine(container) {
               duration: 0.4
             });
             targetPanel.tween.play();
+
+            drawPaths(panel);
           });
         });
       });
     });
   }
 
-  function loadPaths(group, panels) {
+  function drawPaths(panel) {
+    //center of panel
+    var startX = panel.x(),
+        startY = panel.y(),
+        group  = cwine.pathsGroup;
 
-    panels.forEach(function(panelRow) {
-      panelRow.forEach(function(panel){
+    panel.paths.forEach(function(path) {
+      endPanel = cwine.getPanel(path);
+      endX = endPanel.x();
+      endY = endPanel.y();
 
-        //center of panel
-        startX = panel.x();
-        startY = panel.y();
-
-        panel.paths.forEach(function(path) {
-          endPanel = cwine.getPanel(path);
-          endX = endPanel.x();
-          endY = endPanel.y();
-
-          line = new Kinetic.Line({
-                       points: [startX, startY, endX, endY],
-                       stroke: 'black',
-                       strokeWidth: 5,
-                     });
-          group.add(line);
-        });
-      });
+      line = new Kinetic.Line({
+                   points: [startX, startY, endX, endY],
+                   stroke: 'black',
+                   strokeWidth: 5
+                 });
+      group.add(line);
     });
+
+    cwine.page.draw();
   }
 
   function loadUI(layer) {
@@ -216,7 +215,6 @@ var cwine = (function Cwine(container) {
 
       this.pathsGroup.moveToBottom();
       loadPanels(this, config.panels, this.padding);
-      loadPaths(this.pathsGroup, this.panels);
       loadUI(this.ui);
 
       this.reset();
