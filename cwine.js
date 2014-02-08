@@ -33,10 +33,6 @@ var cwine = (function Cwine(container) {
 
       layer.add(panel.image);
 
-      if ( i === 0 ) {
-        obj.startPanel = panel;
-      }
-
       obj.panels[config.x][config.y] = panel;
       obj.indices[panel.image.id()] = { x: config.x,
                                         y: config.y };
@@ -187,6 +183,7 @@ var cwine = (function Cwine(container) {
       loadPanels(this, config.panels, this.padding);
       loadUI(this.ui);
 
+      this.startPanel = this.getPanel(config.startPanel);
       this.reset();
     },
 
@@ -279,5 +276,6 @@ cwine.init({
   panels:      [ panel1, panel2, panel3, panel4 ],
   padding:     40,
   panelWidth:  240,
-  panelHeight: 240
+  panelHeight: 240,
+  startPanel:  "west_of_house"
 });
