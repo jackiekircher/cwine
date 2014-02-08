@@ -27,40 +27,32 @@ var cwine = (function Cwine(container) {
     }
 
     panelConfig.forEach(function(config, i) {
-      var x = config.x,
-          xOffset = (x * (obj.panelWidth + padding)) + 5,
-          y = config.y,
-          yOffset = (y * (obj.panelHeight + padding)) + 5;
+      panel = new Panel( config, obj );
 
-      panel = new Kinetic.Image({
-                    id:          config.id,
-                    image:       config.image,
-                    x:           xOffset,
-                    y:           yOffset,
-                    offset:      { x: obj.panelWidth/2,
-                                   y: obj.panelHeight/2 },
-                    stroke:      'black',
-                    strokeWidth: 5,
-                  });
-      panel.paths = config.paths;
+      panel.pathNames = config.paths;
 
-      layer.add(panel);
+      layer.add(panel.image);
 
       if ( i === 0 ) {
         obj.startPanel = panel;
       }
 
-
-      obj.panels[x][y] = panel;
-      obj.indices[panel.id()] = { x: x,
-                                  y: y };
+      obj.panels[config.x][config.y] = panel;
+      obj.indices[panel.image.id()] = { x: config.x,
+                                        y: config.y };
     });
 
     obj.panels.forEach(function(panelRow, i) {
       panelRow.forEach(function(panel, j) {
+        // create paths between panels
+        panel.pathNames.forEach(function(path) {
+          var targetPanel = cwine.getPanel(path);
+          panel.addPath(targetPanel);
+        });
+
         // center the layer on the current panel whenever
         // it is clicked
-        panel.on('mousedown toachstart', function(){
+        panel.image.on('mousedown toachstart', function(){
           layer.tween = new Kinetic.Tween({
             node:     layer,
             x:        stage.width()/2  - this.x(),
@@ -72,46 +64,24 @@ var cwine = (function Cwine(container) {
           layer.tween.play();
 
           // reveal connected panels
-          panel.paths.forEach(function(path) {
+          panel.pathNames.forEach(function(path) {
             var targetPanel = cwine.getPanel(path);
 
-            targetPanel.show();
-            targetPanel.tween = new Kinetic.Tween({
-              node:     targetPanel,
+            targetPanel.image.show();
+            targetPanel.image.tween = new Kinetic.Tween({
+              node:     targetPanel.image,
               scaleX:   1.0,
               scaleY:   1.0,
               easing:   Kinetic.Easings.ElasticEaseOut,
               duration: 0.4
             });
-            targetPanel.tween.play();
-
-            drawPaths(panel);
+            targetPanel.image.tween.play();
           });
+
+          panel.showPaths();
         });
       });
     });
-  }
-
-  function drawPaths(panel) {
-    //center of panel
-    var startX = panel.x(),
-        startY = panel.y(),
-        group  = cwine.pathsGroup;
-
-    panel.paths.forEach(function(path) {
-      endPanel = cwine.getPanel(path);
-      endX = endPanel.x();
-      endY = endPanel.y();
-
-      line = new Kinetic.Line({
-                   points: [startX, startY, endX, endY],
-                   stroke: 'black',
-                   strokeWidth: 5
-                 });
-      group.add(line);
-    });
-
-    cwine.page.draw();
   }
 
   function loadUI(layer) {
@@ -229,15 +199,13 @@ var cwine = (function Cwine(container) {
       this.panels.forEach(function(panelRow) {
         panelRow.forEach(function(panel) {
           if ( panel !== this.startPanel ) {
-            panel.scale({ x: 0.8, y: 0.8 });
-            panel.hide();
+            panel.image.scale({ x: 0.8, y: 0.8 });
+            panel.image.hide();
           }
+          panel.hidePaths();
         }, this);
       }, this);
 
-      this.pathsGroup.getChildren().each(function(path) {
-        path.hide();
-      });
     },
 
     slide: function cwineSlide(direction) {
@@ -267,15 +235,15 @@ var cwine = (function Cwine(container) {
 
       // reset state to start
       centerX = (this.stage.width() / 2) -
-                 this.startPanel.x();
+                 this.startPanel.image.x();
       centerY = (this.stage.height() / 2) -
-                 this.startPanel.y();
+                 this.startPanel.image.y();
 
       this.page.setX(centerX);
       this.page.setY(centerY);
 
       this.hidePanels();
-      this.startPanel.fire("mousedown");
+      this.startPanel.image.fire("mousedown");
       this.page.draw();
     }
   };
